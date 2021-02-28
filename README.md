@@ -18,7 +18,7 @@ to run and get started with.
 
 ## Teams
 
-Our very cool team: Tanya, Emil, Lizzy and Cydnie
+Our very cool team: Tanya, Emil, Lizzy and Evan
 
 ## Submission
 
