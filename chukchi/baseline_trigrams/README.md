@@ -1,7 +1,9 @@
-# Baseline system
+# Baseline system + trigrams
 
-This is a simple next-word prediction system using bigram probabilities. For each word in the input it 
+This is a simple next-word prediction system using bigram and trigram probabilities. For each word in the input it 
 tries to predict the next word and falls back to predicting the most frequent unigram.
+
+This experiment showed no improvement in the prediction quality. This is most likely due to the small data corpus.
 
 You can train the system by using:
 
