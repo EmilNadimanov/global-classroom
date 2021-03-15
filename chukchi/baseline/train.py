@@ -90,4 +90,5 @@ for token1 in bigram_counts:
 # Write out model
 mf = open(model_file, 'wb')
 pickle.dump((unigrams, bigrams), mf)
+print('Baseline')
 print('Written %d unigrams and %d bigrams to %s.' % (len(unigrams.keys()), n_bigrams, model_file))
