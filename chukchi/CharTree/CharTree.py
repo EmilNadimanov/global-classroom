@@ -1,6 +1,11 @@
 """
 Builds a character-level text-prediction tree based on a corpus that is passed to it.
-Each node except for the root is a
+HOW TO:
+1. import CharTree
+2. run `build_tree` method against a corpus (as a big string). It returns a prediction tree.
+3. predict continuation for an already typed text via `predict` method
+4. OPTIONAL: save model by simply printing the tree. You can then simply pass this chunk of text to python interpreter
+   and it will create the CharTree object you need, implying you have imported CharTree and TreeLeaf classes, of course.
 """
 from nltk.tokenize import word_tokenize
 from typing import Dict, Any, Optional, Tuple
