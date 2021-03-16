@@ -1,14 +1,15 @@
 """
-Builds a character-level text-prediction tree based on a corpus that is passed to it.
+Builds a character-level text prediction tree based on a corpus that is passed to it.
 HOW TO:
 1. import CharTree
 2. run `build_tree` method against a corpus (as a big string). It returns a prediction tree.
-3. predict continuation for an already typed text via `predict` method
+3. predict continuation for an already typed text via `predict` method. Prediction is word-level, i.e. only
+   parts of words should be passed to `predict` method, not phrases.
 4. OPTIONAL: save model by simply printing the tree. You can then simply pass this chunk of text to python interpreter
    and it will create the CharTree object you need, implying you have imported CharTree and TreeLeaf classes, of course.
 """
 from nltk.tokenize import word_tokenize
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional
 
 
 class CharTree:
@@ -71,7 +72,7 @@ class CharTree:
             else:
                 accumulate += f"'None': TreeLeaf()"
             accumulate += ","
-        return accumulate[:-1]  # дропаем последнюю запятую - она лишняя
+        return accumulate[:-1]  # dropping the last comma - it's redundant and even harmful
 
     def __repr__(self):
         root = f"CharTree(data='{self.data}', children={{"
