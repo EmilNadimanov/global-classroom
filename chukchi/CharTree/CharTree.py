@@ -38,7 +38,7 @@ class CharTree:
     def __hash__(self):
         return self.data.__hash__()
 
-    def __build_branch(self, word):
+    def __build_branch(self, word: str):
         self.children[word[0]] = self.children.get(word[0], CharTree(data=word[0]))
         child: CharTree = self.children[word[0]]
         child.count += 1
@@ -52,7 +52,7 @@ class CharTree:
     def build_tree(corpus: str):
         tree = CharTree(data="")
         for word in word_tokenize(corpus):
-            tree.__build_branch(word)
+            tree.__build_branch(word.lower())
             # windows = self.__sliding_window__(word)
             # for w in windows:
             #     char_1 = w[0]
@@ -102,8 +102,9 @@ class CharTree:
         else:
             return most_probable_letter + child.__get_most_probable_continuation()
 
-    def predict(self, typed_text):
-        match = self.__get_matching_subtree(typed_text)
+    def predict(self, typed_text: str):
+        __lowered_text = typed_text.lower()
+        match = self.__get_matching_subtree(__lowered_text)
         if match is None:
             return None
         continuation: str = match.__get_most_probable_continuation()
