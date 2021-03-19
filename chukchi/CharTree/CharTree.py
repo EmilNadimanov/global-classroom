@@ -16,10 +16,11 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 
 
 def _format_input_data(data):
-    _data = data
+    _data = data.lower()
+    _data = re.sub(r"['`ʼ‘’\"“]", 'ʼ', _data)
+    _data = re.sub(r'[åòêíóýîüûã]', '', _data)  # TODO: fix corpus
     _data = re.sub(r'ль', 'ԓь', _data)
     _data = re.sub(r'Ль', 'Ԓь', _data)
-    _data = re.sub(r"['`ʼ’\"“]", 'ʼ', _data)
     _data = re.sub(r"кʼ", 'ӄ', _data)
     _data = re.sub(r"Kʼ", 'Ӄ', _data)
     _data = re.sub(r"нʼ", 'ӈ', _data)
@@ -55,14 +56,23 @@ class CharTree:
     #         yield tuple(win)
 
     def __hash__(self):
+        """
+        not used, keep it just in case
+        """
         return self.data.__hash__()
 
     def __repr__(self):
+        """
+        you can just copy the output of your typical `print` function and then copypaste it to recreate a tree
+        """
         root = f"CharTree(data='{self.data}', children={{"
         children = self.__repr_children()
         return root + children + "})"
 
     def __build_branch(self, word: str):
+        """
+        Function used for recursive creation of chartree branches
+        """
         self.children[word[0]] = self.children.get(word[0], CharTree(data=word[0]))
         child: CharTree = self.children[word[0]]
         child.count += 1
@@ -72,23 +82,11 @@ class CharTree:
             child.children[None] = self.children.get(None, TreeLeaf())
             child.children[None].count += 1
 
-    @staticmethod
-    def build_tree(corpus: str):
-        tree = CharTree(data="")
-        _corpus = corpus
-        _corpus = _format_input_data(_corpus)
-        for word in word_tokenize(_corpus):
-            tree.__build_branch(word.lower())
-            # windows = self.__sliding_window__(word)
-            # for w in windows:
-            #     char_1 = w[0]
-            #     char_2 = w[0]
-            #     current[char_1] = current.get(char_1, dict())
-            #     current = current[char_1]
-            #     current[char_2] = current.get(char_1, dict())
-        return tree
-
     def __repr_children(self):
+        """
+        We need a separate function that creates `print` representation of children in recursive manner,
+        because unlike the root object these are wrapped in curly braces and are values in a dict
+        """
         accumulate: str = ""
         for key in self.children.keys():
             child: CharTree = self.children[key]
@@ -100,6 +98,9 @@ class CharTree:
         return accumulate[:-1]  # dropping the last comma - it's redundant and even harmful
 
     def __get_matching_subtree(self, typed_text) -> Optional['CharTree']:
+        """
+        self-explainatory name. Given typed text, we try to find the already determined node in the tree.
+        """
         try:
             child = self.children[typed_text[0]]
             if len(typed_text) > 1:
@@ -111,15 +112,40 @@ class CharTree:
             return None
 
     def __get_most_probable_continuation(self) -> str:
+        """
+        Go down the tree through the nodes with higher count (most probablee ones), collecting the chars they represent
+        along the way
+        """
         (most_probable_letter, child) = max(self.children.items(), key=lambda kv: kv[1].count)
         if most_probable_letter is None:
             return ''
         else:
             return most_probable_letter + child.__get_most_probable_continuation()
 
+    @staticmethod
+    def build_tree(corpus: str):
+        """
+        The main thing to build a CharTree. Pass a corpus as a string and get a chartree as a return value
+        """
+        tree = CharTree(data="")
+        _corpus = corpus
+        _corpus = _format_input_data(_corpus)
+        for word in word_tokenize(_corpus):
+            tree.__build_branch(word)
+        return tree
+
     def printout(self, level=0):
         """
-        A simple visualisation of the CharTree object
+        A simple visualisation of any CharTree object.
+        Left number represents the level (from 0 to N)
+        The number next to a letter represents how often it was encountered in this position
+        Example:
+        0| l-5
+        1|   a-5
+        2|     m-5
+        3|       p-3
+        3|       a-2
+        This makes "lama" LESS probable than "lamp", given input "lam"
         """
         for key in self.children.keys():
             child = self.children[key]
