@@ -49,12 +49,20 @@ for line in sys.stdin.readlines():
 			else:
 				# попробую добавить максимально подходящую биграмму, затем - максимальную униграмму
 				pred = max(bigrams[first], key=bigrams[first].get)
-				pred = max(trigrams[first][pred], key=trigrams[first][pred].get)
-				if pred == third:
-					output.append(pred)
-					hits += 1
-				else:
-					output += [c for c in third]
+				try:
+					pred = max(trigrams[first][pred], key=trigrams[first][pred].get)
+					if pred == third:
+						output.append(pred)
+						hits += 1
+					else:
+						output += [c for c in third]
+				except KeyError as e:
+					if pred == '#':
+						output.append(pred)
+						hits += 1
+					else:
+						raise e
+
 		else:
 			pred = max(unigrams, key=unigrams.get)
 			if pred == third:
