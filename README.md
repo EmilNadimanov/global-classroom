@@ -7,6 +7,9 @@ about the projects you can participate in.
 ## Useful stuff
 [Bibliography doc](https://docs.google.com/document/d/1VNhn46upyEo8SV8h5fxPcY7bHyT9KsgiZbsLu9Imuzk/edit?usp=sharing)
 
+Link to google doc with Log for meetings and chukchi morphological info
+https://docs.google.com/document/d/1544a4w1qYSXHM8L82Otawu-ioLe-GlekFgqHXnFmM9I/edit?usp=sharing 
+
 ## Project
 1. [Predictive text for Chukchi](chukchi/)
 
