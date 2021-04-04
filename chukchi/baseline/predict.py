@@ -1,7 +1,11 @@
-import sys, pickle
-
+import os
+import sys
+import pickle
+sys.path.append(os.path.abspath('../..'))
+from chukchi.tree.CharTree import CharTree
+TREE = CharTree.build_tree(open("/home/emil/Uni/MLproject/global-classroom/chukchi/data/texts.txt").read())
 # This is the filename of the model file
-model_file = sys.argv[1]
+model_file = "model.dat"
 mf = open(model_file, 'rb')
 
 # Load the unigram and bigram probabilities from the model file
@@ -14,6 +18,19 @@ unigrams['#'] = 0.0
 hits = 0
 # The number of tokens
 n_tokens = 0
+
+
+# used to predict a word by its characters when ngrams are of no use
+def predict_by_chars(word):
+    result = list()
+    for j in range(len(word)):
+        if TREE.predict(word[0: j]) == word:
+            rest = word[j+1:]
+            result.extend([word[j], rest])
+            break
+        else:
+            result.append(word[j])
+    return result
 # For each of the lines in the input
 for line in sys.stdin.readlines():
 	# Split into two columns
@@ -24,19 +41,19 @@ for line in sys.stdin.readlines():
 	tst_tokens = ['#'] + tokens
 	# Increment the number of tokens by the length of the list containing the tokens
 	n_tokens += len(tokens)
-	
+
 	# This is our output
 	output = []
 	# For each of the tokens in the "tst_tokens" list (e.g. the list + the beginning of sentence symbol)
-	for i in range(len(tst_tokens)-1):
-		up = 0.0 # Unigram probability
-		bp = 0.0 # Bigram probability
-		first = tst_tokens[i] # First token in bigram
-		second = tst_tokens[i+1] # Second token in bigram
+	for i in range(len(tst_tokens) - 1):
+		up = 0.0  # Unigram probability
+		bp = 0.0  # Bigram probability
+		first = tst_tokens[i]  # First token in bigram
+		second = tst_tokens[i + 1]  # Second token in bigram
 		# If we find the first token in the bigrams dict
 		if first in bigrams:
 			# We get the best prediction for what token should come next
-			pred = max(bigrams[first], key=bigrams[first].get) 
+			pred = max(bigrams[first], key=bigrams[first].get)
 			# If it matches with what the next token really is
 			if pred == second:
 				# We add this whole token to the output
@@ -47,20 +64,23 @@ for line in sys.stdin.readlines():
 			else:
 				# Otherwise we add each individual character to the output
 				# e.g. writing out each of the individual clicks
-				output += [c for c in second]
+				output += predict_by_chars(second)
+				# output += [c for c in second]
+
 		# If we haven't found a bigram, we just try proposing the most frequent unigram
 		else:
 			# Find the highest scoring unigram
-			pred = max(unigrams, key=unigrams.get) 
+			pred = max(unigrams, key=unigrams.get)
 			# If the prediction is right
 			if pred == second:
 				# Append to output
 				output.append(pred)
 				hits += 1
-#				print('!', first, '→', pred,'|||', unigrams[pred], file=sys.stderr)
+			#				print('!', first, '→', pred,'|||', unigrams[pred], file=sys.stderr)
 			else:
 				# Otherwise append each individual character
-				output += [c for c in second]
+				output += predict_by_chars(second)
+				# output += [c for c in second]
 		# Finally append a space symbol
 		output.append('_')
 

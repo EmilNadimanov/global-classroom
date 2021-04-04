@@ -1,12 +1,12 @@
 """
 Builds a character-level text prediction tree based on a corpus that is passed to it.
 HOW TO:
-1. import CharTree
+1. import tree
 2. run `build_tree` method against a corpus (as a big string). It returns a prediction tree.
 3. predict continuation for an already typed text via `predict` method. Prediction is word-level, i.e. only
    parts of words should be passed to `predict` method, not phrases.
 4. OPTIONAL: save model by simply printing the tree. You can then simply pass this chunk of text to python interpreter
-   and it will create the CharTree object you need, implying you have imported CharTree and TreeLeaf classes, of course.
+   and it will create the tree object you need, implying you have imported tree and TreeLeaf classes, of course.
 """
 import string
 from typing import Dict, Any, Optional
@@ -63,7 +63,8 @@ class CharTree:
 
     def __repr__(self):
         """
-        you can just copy the output of your typical `print` function and then copypaste it to recreate a tree
+        you can just copy the output of your typical `print` function and then copypaste it to recreate a tree.
+        But a big tree should be pickled with pickle.dump(). This func is more for lulz and testing
         """
         root = f"CharTree(data='{self.data}', children={{"
         children = self.__repr_children()
@@ -108,8 +109,8 @@ class CharTree:
             else:
                 match = child
             return match
-        except KeyError:
-            return None
+        except (KeyError, IndexError):
+            return self
 
     def __get_most_probable_continuation(self) -> str:
         """

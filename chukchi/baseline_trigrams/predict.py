@@ -45,6 +45,7 @@ for line in sys.stdin.readlines():
 						output.append(pred)
 						hits += 1
 					else:
+						# add tree here. Make a function
 						output += [c for c in third]
 			else:
 				# попробую добавить максимально подходящую биграмму, затем - максимальную униграмму
