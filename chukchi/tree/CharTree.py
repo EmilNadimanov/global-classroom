@@ -12,32 +12,17 @@ import string
 from typing import Dict, Any, Optional
 import re
 
-from nltk.tokenize import word_tokenize, sent_tokenize
-
-
-def _format_input_data(data):
-    _data = data.lower()
-    _data = re.sub(r"['`ʼ‘’\"“]", 'ʼ', _data)
-    _data = re.sub(r'[åòêíóýîüûã]', '', _data)  # TODO: fix corpus
-    _data = re.sub(r'ль', 'ԓь', _data)
-    _data = re.sub(r'Ль', 'Ԓь', _data)
-    _data = re.sub(r"кʼ", 'ӄ', _data)
-    _data = re.sub(r"Kʼ", 'Ӄ', _data)
-    _data = re.sub(r"нʼ", 'ӈ', _data)
-    _data = re.sub(r"Нʼ", 'Ӈ', _data)
-    # replace latin with cyrillic AND drop punctuation
-    _data = _data.translate(str.maketrans('eyopac', 'еуорас', string.punctuation))
-    _data = re.sub(r"\d", '', _data)
-    return _data
+from nltk.tokenize import word_tokenize
 
 
 class CharTree:
-    def __init__(self, data, children=None, count=0):
+    def __init__(self, data, children=None, count=0, step=1):
         if children is None:
             children = dict()
         self.data: Any = data
         self.children: Dict[Optional[str], CharTree] = children
         self.count: int = count
+        self.step: int = step
 
     # def __sliding_window__(self, word: str, size=2):
     #     """
@@ -66,20 +51,53 @@ class CharTree:
         you can just copy the output of your typical `print` function and then copypaste it to recreate a tree.
         But a big tree should be pickled with pickle.dump(). This func is more for lulz and testing
         """
-        root = f"CharTree(data='{self.data}', children={{"
+        root = f"{self.__class__.__name__}(data='{self.data}', children={{"
         children = self.__repr_children()
         return root + children + "})"
+
+    @staticmethod
+    def _format_input_data(data):
+        _data = data.lower()
+        _data = re.sub(r"['`ʼ‘’\"“]", 'ʼ', _data)
+        _data = re.sub(r'[åòêíóýîüûã]', '', _data)  # TODO: fix corpus
+        _data = re.sub(r'ль', 'ԓь', _data)
+        _data = re.sub(r'Ль', 'Ԓь', _data)
+        _data = re.sub(r"кʼ", 'ӄ', _data)
+        _data = re.sub(r"Kʼ", 'Ӄ', _data)
+        _data = re.sub(r"нʼ", 'ӈ', _data)
+        _data = re.sub(r"Нʼ", 'Ӈ', _data)
+        # replace latin with cyrillic AND drop punctuation
+        _data = _data.translate(str.maketrans('eyopac', 'еуорас', string.punctuation))
+        _data = re.sub(r"\d", '', _data)
+        return _data
+
+    @staticmethod
+    def build_tree(corpus: str, step=1):
+        """
+        The main thing to build a CharTree. Pass a corpus as a string and get a chartree as a return value
+        """
+        tree = CharTree(data="", step=step)
+        _corpus = corpus
+        _corpus = CharTree._format_input_data(_corpus)
+        for word in word_tokenize(_corpus):
+            tree.__build_branch(word)
+        return tree
 
     def __build_branch(self, word: str):
         """
         Function used for recursive creation of chartree branches
         """
-        self.children[word[0]] = self.children.get(word[0], CharTree(data=word[0]))
-        child: CharTree = self.children[word[0]]
+        length_of_word = len(word)
+        if length_of_word >= self.step:
+            seq = word[:self.step]
+        else:
+            seq = word[:length_of_word]
+        self.children[seq] = self.children.get(seq, CharTree(data=seq, step=self.step))
+        child: CharTree = self.children[seq]
         child.count += 1
-        if len(word) > 1:
-            child.__build_branch(word[1:])
-        elif len(word) == 1:
+        if length_of_word > self.step:
+            child.__build_branch(word[self.step:])
+        elif length_of_word <= self.step:
             child.children[None] = self.children.get(None, TreeLeaf())
             child.children[None].count += 1
 
@@ -92,22 +110,23 @@ class CharTree:
         for key in self.children.keys():
             child: CharTree = self.children[key]
             if child.data is not None:
-                accumulate += f"'{child.data}': CharTree(data='{child.data}', count={child.count} children={{{child.__repr_children()}}}) "
+                accumulate += f"'{child.data}': {self.__class__.__name__}(data='{child.data}', count={child.count} children={{{child.__repr_children()}}}) "
             else:
                 accumulate += f"'None': TreeLeaf()"
             accumulate += ","
         return accumulate[:-1]  # dropping the last comma - it's redundant and even harmful
 
-    def __get_matching_subtree(self, typed_text) -> Optional['CharTree']:
+    def _get_matching_subtree(self, typed_text) -> Optional['CharTree']:
         """
         self-explainatory name. Given typed text, we try to find the already determined node in the tree.
         """
         try:
-            child = self.children[typed_text[0]]
-            if len(typed_text) > 1:
-                match = child.__get_matching_subtree(typed_text[1:])
+            length = len(typed_text)
+            if length >= self.step:
+                child = self.children[typed_text[:self.step]]
+                match = child._get_matching_subtree(typed_text[self.step:])
             else:
-                match = child
+                match = self.children[typed_text[:length]]
             return match
         except (KeyError, IndexError):
             return self
@@ -122,18 +141,6 @@ class CharTree:
             return ''
         else:
             return most_probable_letter + child.__get_most_probable_continuation()
-
-    @staticmethod
-    def build_tree(corpus: str):
-        """
-        The main thing to build a CharTree. Pass a corpus as a string and get a chartree as a return value
-        """
-        tree = CharTree(data="")
-        _corpus = corpus
-        _corpus = _format_input_data(_corpus)
-        for word in word_tokenize(_corpus):
-            tree.__build_branch(word)
-        return tree
 
     def printout(self, level=0):
         """
@@ -154,8 +161,8 @@ class CharTree:
             child.printout(level + 1)
 
     def predict(self, typed_text: str):
-        __lowered_text = _format_input_data(typed_text.lower())
-        match = self.__get_matching_subtree(__lowered_text)
+        __lowered_text = CharTree._format_input_data(typed_text.lower())
+        match = self._get_matching_subtree(__lowered_text)
         if match is None:
             return None
         continuation: str = match.__get_most_probable_continuation()
