@@ -9,3 +9,5 @@ output.tsv:
 
 clean:
 	rm model.dat output.tsv
+
+re: clean all
