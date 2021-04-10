@@ -5,7 +5,7 @@ import pickle
 sys.path.append(os.path.abspath('../..'))
 from chukchi.tree.CharTree import CharTree
 
-TREE = CharTree.build_tree(open("/home/emil/Uni/MLproject/global-classroom/chukchi/data/texts.txt").read(), step=2)
+TREE = CharTree.build_tree(open("../data/texts.txt").read(), step=2)
 # This is the filename of the model file
 model_file = "model.dat"
 mf = open(model_file, 'rb')
@@ -36,7 +36,7 @@ def predict_by_chars(word):
 
 
 # For each of the lines in the input
-for line in open("/home/emil/Uni/MLproject/global-classroom/chukchi/data/dev.tsv").readlines():
+for line in sys.stdin.readlines():
     # Split into two columns
     row = line.strip().split('\t')
     # Our tokens are in column one, split by space
@@ -69,7 +69,7 @@ for line in open("/home/emil/Uni/MLproject/global-classroom/chukchi/data/dev.tsv
                 # Otherwise we add each individual character to the output
                 # e.g. writing out each of the individual clicks
                 output += predict_by_chars(second)
-            # output += [c for c in second]
+                # output += [c for c in second]
 
         # If we haven't found a bigram, we just try proposing the most frequent unigram
         else:
@@ -84,7 +84,7 @@ for line in open("/home/emil/Uni/MLproject/global-classroom/chukchi/data/dev.tsv
             else:
                 # Otherwise append each individual character
                 output += predict_by_chars(second)
-            # output += [c for c in second]
+                # output += [c for c in second]
         # Finally append a space symbol
         output.append('_')
 
