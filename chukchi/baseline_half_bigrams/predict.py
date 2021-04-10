@@ -3,8 +3,8 @@ import pandas as pd
 
 # This is the filename of the model file
 
-#model_file = sys.argv[1]
-model_file = './model.dat'
+model_file = sys.argv[1]
+#model_file = './model.dat'
 
 mf = open(model_file, 'rb')
 
@@ -26,8 +26,8 @@ with open(f'./dev.tsv', encoding='utf-8') as f:
 #df_half_bigrams = pd.DataFrame.from_dict(half_bigrams)
 #print(df_half_bigrams.head())
 
-#for line in sys.stdin.readlines():
-for line in lines:
+for line in sys.stdin.readlines():
+#for line in lines:
 	row = line.strip().split('\t')
 	# Our tokens are in column one, split by space
 	tokens = row[0].split(' ')
@@ -56,9 +56,11 @@ for line in lines:
 							#print(bigrams[str(n + 1)][first][second_begin])
 							pred = max(bigrams[str(n + 1)][first][second_begin], key=bigrams[str(n + 1)][first][second_begin].get)
 							if second_begin + pred == second:
-								output.append(second)
+								output += [c for c in second_begin]
+								output.append(pred)
 								hits += 1
 								flag = True
+								#print('HERE')
 								break
 				if flag == False:
 					output += [c for c in second]
