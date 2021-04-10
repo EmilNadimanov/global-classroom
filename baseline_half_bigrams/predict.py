@@ -20,7 +20,7 @@ hits = 0
 # The number of tokens
 n_tokens = 0
 # For each of the lines in the input
-with open(f'../data/dev.tsv', encoding='utf-8') as f:
+with open(f'./dev.tsv', encoding='utf-8') as f:
     lines = f.readlines()
 
 #df_half_bigrams = pd.DataFrame.from_dict(half_bigrams)
