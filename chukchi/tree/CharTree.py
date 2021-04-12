@@ -80,6 +80,8 @@ class CharTree:
         _corpus = corpus
         _corpus = CharTree._format_input_data(_corpus)
         for word in word_tokenize(_corpus):
+            if word == "гымнин":
+                a = 1
             tree.__build_branch(word)
         return tree
 
@@ -98,7 +100,7 @@ class CharTree:
         if length_of_word > self.step:
             child.__build_branch(word[self.step:])
         elif length_of_word <= self.step:
-            child.children[None] = self.children.get(None, TreeLeaf())
+            child.children[None] = child.children.get(None, TreeLeaf())
             child.children[None].count += 1
 
     def __repr_children(self):
