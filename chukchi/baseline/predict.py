@@ -68,8 +68,8 @@ for line in sys.stdin.readlines():
             else:
                 # Otherwise we add each individual character to the output
                 # e.g. writing out each of the individual clicks
-                output += predict_by_chars(second)
-                # output += [c for c in second]
+                # output += predict_by_chars(second)
+                output += [c for c in second]
 
         # If we haven't found a bigram, we just try proposing the most frequent unigram
         else:
@@ -83,8 +83,8 @@ for line in sys.stdin.readlines():
             #				print('!', first, '→', pred,'|||', unigrams[pred], file=sys.stderr)
             else:
                 # Otherwise append each individual character
-                output += predict_by_chars(second)
-                # output += [c for c in second]
+                # output += predict_by_chars(second)
+                output += [c for c in second]
         # Finally append a space symbol
         output.append('_')
 

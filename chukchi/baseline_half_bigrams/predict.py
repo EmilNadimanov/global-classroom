@@ -90,10 +90,7 @@ for line in open("../data/test/test.tsv").readlines():
                                 # print('HERE')
                                 break
                 if flag is False:
-                    (prediction, got_lucky) = predict_by_chars(second)
-                    output += prediction
-                    if got_lucky:
-                        hits += 1
+                    output += [c for c in second]
         else:
             pred = max(unigrams, key=unigrams.get)
             if pred == second:
